@@ -157,16 +157,23 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
-        /// Paint this line
+        /// Paint this line's background
         /// </summary>
         /// <param name="ctx">The paint context</param>
-        internal void Paint(PaintTextContext ctx)
+        internal void PaintBackground(PaintTextContext ctx)
         {
             foreach (var r in Runs)
             {
                 r.PaintBackground(ctx);
             }
-            
+        }
+
+        /// <summary>
+        /// Paint this line
+        /// </summary>
+        /// <param name="ctx">The paint context</param>
+        internal void Paint(PaintTextContext ctx)
+        {
             foreach (var r in Runs)
             {
                 r.Paint(ctx);

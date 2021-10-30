@@ -92,5 +92,20 @@ namespace Topten.RichTextKit
         /// Specifies a replacement character to be displayed (password mode)
         /// </summary>
         char ReplacementCharacter { get; }
+
+        /// <summary>
+        /// Add a text effect to this style
+        /// </summary>
+        void AddEffect(TextEffect textEffect);
+
+        /// <summary>
+        /// Remove all text effects
+        /// </summary>
+        void ClearEffects();
+
+        /// <summary>
+        /// Effects to apply
+        /// </summary>
+        IEnumerable<TextEffect> TextEffects { get; }
     }
 }

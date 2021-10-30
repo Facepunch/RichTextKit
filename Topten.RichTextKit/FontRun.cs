@@ -18,6 +18,7 @@ using HarfBuzzSharp;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Topten.RichTextKit.Utils;
 
@@ -518,6 +519,50 @@ namespace Topten.RichTextKit
             }
         }
 
+        internal unsafe float CreateTextBlob(PaintTextContext ctx)
+		{
+            fixed (ushort* pGlyphs = Glyphs.Underlying)
+            {
+                float glyphScale = 1;
+                float glyphVOffset = 0;
+                if (Style.FontVariant == FontVariant.SuperScript)
+                {
+                    glyphScale = 0.65f;
+                    glyphVOffset = -Style.FontSize * 0.35f;
+                }
+                if (Style.FontVariant == FontVariant.SubScript)
+                {
+                    glyphScale = 0.65f;
+                    glyphVOffset = Style.FontSize * 0.1f;
+                }
+
+                // Get glyph positions
+                var glyphPositions = GlyphPositions.ToArray();
+
+                // Create the font
+                if (_font == null)
+                {
+                    _font = new SKFont(this.Typeface, this.Style.FontSize * glyphScale);
+                }
+                _font.Hinting = ctx.Options.Hinting;
+                _font.Edging = ctx.Options.Edging;
+                _font.Subpixel = ctx.Options.SubpixelPositioning;
+
+                // Create the SKTextBlob (if necessary)
+                if (_textBlob == null)
+                {
+                    _textBlob = SKTextBlob.CreatePositioned(
+                        (IntPtr)(pGlyphs + Glyphs.Start),
+                        Glyphs.Length * sizeof(ushort),
+                        SKTextEncoding.GlyphId,
+                        _font,
+                        GlyphPositions.AsSpan());
+                }
+
+                return glyphVOffset;
+            }
+        }
+
         /// <summary>
         /// Paint this font run
         /// </summary>
@@ -603,50 +648,15 @@ namespace Topten.RichTextKit
             // Text 
             using (var paint = new SKPaint())
             {
-                // Work out font variant adjustments
-                float glyphScale = 1;
-                float glyphVOffset = 0;
-                if (Style.FontVariant == FontVariant.SuperScript)
-                {
-                    glyphScale = 0.65f;
-                    glyphVOffset = -Style.FontSize * 0.35f;
-                }
-                if (Style.FontVariant == FontVariant.SubScript)
-                {
-                    glyphScale = 0.65f;
-                    glyphVOffset = Style.FontSize * 0.1f;
-                }
-
                 // Setup SKPaint
                 paint.Color = Style.TextColor;
+
+                var glyphVOffset = CreateTextBlob(ctx);
 
                 unsafe
                 {
                     fixed (ushort* pGlyphs = Glyphs.Underlying)
                     {
-                        // Get glyph positions
-                        var glyphPositions = GlyphPositions.ToArray();
-
-                        // Create the font
-                        if (_font == null)
-                        {
-                            _font = new SKFont(this.Typeface, this.Style.FontSize * glyphScale);
-                        }
-                        _font.Hinting = ctx.Options.Hinting;
-                        _font.Edging = ctx.Options.Edging;
-                        _font.Subpixel = ctx.Options.SubpixelPositioning;
-
-                        // Create the SKTextBlob (if necessary)
-                        if (_textBlob == null)
-                        {
-                            _textBlob = SKTextBlob.CreatePositioned(
-                                (IntPtr)(pGlyphs + Glyphs.Start),
-                                Glyphs.Length * sizeof(ushort),
-                                SKTextEncoding.GlyphId,
-                                _font,
-                                GlyphPositions.AsSpan());
-                        }
-
                         // Paint underline
                         if (Style.Underline != UnderlineStyle.None && RunKind == FontRunKind.Normal)
                         {
@@ -700,7 +710,6 @@ namespace Topten.RichTextKit
                             }
                         }
 
-
                         ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
                     }
                 }
@@ -729,7 +738,33 @@ namespace Topten.RichTextKit
                 {
                     ctx.Canvas.DrawRect(rect, skPaint);
                 }
-            }            
+            }
+
+            if (Style.TextEffects == null || Style.TextEffects.Count() == 0)
+                return;
+
+            CreateTextBlob(ctx);
+
+            if (_textBlob == null)
+                return;
+
+            using (var paint = new SKPaint())
+            {
+                using (var effectPaint = paint.Clone())
+                {
+                    foreach (var effect in Style.TextEffects)
+                    {
+                        effectPaint.Style = effect.PaintStyle;
+                        effectPaint.StrokeWidth = effect.Width;
+                        effectPaint.StrokeJoin = effect.StrkeJoin;
+                        effectPaint.StrokeMiter = effect.StrokeMiter;
+                        effectPaint.Color = effect.Color;
+                        effectPaint.MaskFilter = effect.BlurSize > 0 ? SKMaskFilter.CreateBlur(effect.BlurStyle, effect.BlurSize, false) : null;
+
+                        ctx.Canvas.DrawText(_textBlob, effect.Offset.X, effect.Offset.Y, effectPaint);
+                    }
+                }
+            }
         }
 
         SKTextBlob _textBlob;

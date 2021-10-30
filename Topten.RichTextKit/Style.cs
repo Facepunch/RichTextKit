@@ -160,6 +160,31 @@ namespace Topten.RichTextKit
             set { CheckNotSealed(); _replacementCharacter = value; }
         }
 
+        /// <summary>
+        /// Add a text effect to this style
+        /// </summary>
+        public void AddEffect(TextEffect textEffect)
+        {
+            if (_textEffects == null)
+                _textEffects = new List<TextEffect>();
+
+            _textEffects.Add(textEffect);
+        }
+
+
+        /// <summary>
+        /// Remove all text effects
+        /// </summary>
+        public void ClearEffects()
+		{
+            _textEffects?.Clear();
+
+        }
+
+        /// <summary>
+        /// Effects to apply
+        /// </summary>
+        public IEnumerable<TextEffect> TextEffects => _textEffects;
 
         bool _sealed;
         string _fontFamily = "Arial";
@@ -175,6 +200,7 @@ namespace Topten.RichTextKit
         FontVariant _fontVariant;
         TextDirection _textDirection = TextDirection.Auto;
         char _replacementCharacter = '\0';
+        List<TextEffect> _textEffects;
 
         /// <summary>
         /// Modifies this style with one or more attribute changes and returns a new style

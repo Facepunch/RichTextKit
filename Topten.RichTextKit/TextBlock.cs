@@ -393,6 +393,11 @@ namespace Topten.RichTextKit
                 ctx.SelectionEnd = -1;
             }
 
+            foreach (var l in _lines)
+            {
+                l.PaintBackground(ctx);
+            }
+
             // Paint each line
             foreach (var l in _lines)
             {

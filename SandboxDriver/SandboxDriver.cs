@@ -71,8 +71,15 @@ namespace SandboxDriver
             var styleBoldLarge = styleNormal.Modify(fontSize: 28 * Scale, fontWeight: 700);
             var styleRed = styleNormal.Modify(textColor: new SKColor(0xFFFF0000));
             var styleBlue = styleNormal.Modify(textColor: new SKColor(0xFF0000FF));
-            var styleFontAwesome = new Style() { FontFamily = "FontAwesome", FontSize = 24 * Scale};
+            var styleFontAwesome = new Style() { FontFamily = "FontAwesome", FontSize = 24 * Scale };
+            var styleShadow = styleNormal.Modify();
 
+            var shadowEffect = TextEffect.DropShadow(new SKColor(0xFF000000), 1, 1, 4);
+            shadowEffect.Width += 2 * 0.25f;
+            styleShadow.AddEffect(shadowEffect);
+
+            var outlineEffect = TextEffect.Outline(new SKColor(0xFFFF0000), 1);
+            styleShadow.AddEffect(outlineEffect);
 
             _textBlock.Clear();
             _textBlock.MaxWidth = width;
@@ -110,7 +117,8 @@ namespace SandboxDriver
                     _textBlock.AddText(".\n\n", styleNormal);
                     _textBlock.AddText("Font fallback means emojis work: 🙍‍♀️ 🌐 🍪 🍕 🚀 and ", styleNormal);
                     _textBlock.AddText("text shaping and bi-directional text support means complex scripts and languages like Arabic: مرحبا بالعالم, Japanese: ハローワールド, Chinese: 世界您好 and Hindi: हैलो वर्ल्ड are rendered correctly!\n\n", styleNormal);
-                    _textBlock.AddText("RichTextKit also supports left/center/right text alignment, word wrapping, truncation with ellipsis place-holder, text measurement, hit testing, painting a selection range, caret position & shape helpers.", styleNormal);
+                    _textBlock.AddText("RichTextKit also supports left/center/right text alignment, word wrapping, truncation with ellipsis place-holder, text measurement, hit testing, painting a selection range, caret position & shape helpers.\n\n", styleNormal);
+                    _textBlock.AddText("Line 1. Text with effects and linebreaks\n\nLine 2. Text with effects and 🙍 🌐 emoji. \n🍕\nLine 3. Another line with empty lines under it\n\n", styleShadow);
                     break;
 
                 case 1:

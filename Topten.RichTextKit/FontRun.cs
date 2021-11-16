@@ -730,6 +730,8 @@ namespace Topten.RichTextKit
         /// <param name="ctx"></param>
         internal void PaintBackground(PaintTextContext ctx)
         {
+            if (RunKind == FontRunKind.TrailingWhitespace) return;
+
             if (Style.BackgroundColor != SKColor.Empty && RunKind == FontRunKind.Normal)
             {
                 var rect = new SKRect(XCoord , Line.YCoord, 

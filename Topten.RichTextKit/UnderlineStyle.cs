@@ -29,41 +29,41 @@ namespace Topten.RichTextKit
         /// <summary>
         /// No underline.
         /// </summary>
-        None,
+        None = 0,
 
         /// <summary>
         /// Underline with gaps over descenders.
         /// </summary>
-        Gapped,
+        Gapped = 1,
 
         /// <summary>
         /// Underline with no gaps over descenders.
         /// </summary>
-        Solid,
+        Solid = 2,
 
         /// <summary>
         /// Underline style for IME input
         /// </summary>
-        ImeInput,
+        ImeInput = 4,
 
         /// <summary>
         /// Underline style for converted IME input
         /// </summary>
-        ImeConverted,
+        ImeConverted = 8,
 
         /// <summary>
         /// Underline style for converted IME input (target clause)
         /// </summary>
-        ImeTargetConverted,
+        ImeTargetConverted = 16,
 
         /// <summary>
         /// Underline style for unconverted IME input (target clause)
         /// </summary>
-        ImeTargetNonConverted,
+        ImeTargetNonConverted = 32,
 
         /// <summary>
         /// Create a line over the top of the text
         /// </summary>
-        Overline,
+        Overline = 64,
     }
 }

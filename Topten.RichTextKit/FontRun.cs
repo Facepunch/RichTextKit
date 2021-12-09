@@ -170,7 +170,7 @@ namespace Topten.RichTextKit
         {
             get
             {
-                var allRuns = Line.TextBlock.FontRuns as List<FontRun>; 
+                var allRuns = Line.TextBlock.FontRuns as List<FontRun>;
                 int index = allRuns.IndexOf(this);
                 if (index < 0 || index + 1 >= Line.Runs.Count)
                     return null;
@@ -185,7 +185,7 @@ namespace Topten.RichTextKit
         {
             get
             {
-                var allRuns = Line.TextBlock.FontRuns as List<FontRun>; 
+                var allRuns = Line.TextBlock.FontRuns as List<FontRun>;
                 int index = allRuns.IndexOf(this);
                 if (index - 1 < 0)
                     return null;
@@ -510,7 +510,7 @@ namespace Topten.RichTextKit
                                     leftOverhang = loh;
 
                                 var roh = (gx + bounds[i].Right + 1) - right;
-                                if (roh > rightOverhang) 
+                                if (roh > rightOverhang)
                                     rightOverhang = roh;
                             }
                         }
@@ -520,7 +520,7 @@ namespace Topten.RichTextKit
         }
 
         internal unsafe float CreateTextBlob(PaintTextContext ctx)
-		{
+        {
             fixed (ushort* pGlyphs = Glyphs.Underlying)
             {
                 float glyphScale = 1;
@@ -664,9 +664,10 @@ namespace Topten.RichTextKit
                             float underlineYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.UnderlinePosition ?? 0);
 
                             paint.StrokeWidth = _font.Metrics.UnderlineThickness ?? 1;
-
-                            if (Style.Underline == UnderlineStyle.Gapped)
+                            bool bHasUnderline = false;
+                            if ((Style.Underline & UnderlineStyle.Gapped) != 0)
                             {
+                                bHasUnderline = true;
                                 // Get intercept positions
                                 var interceptPositions = _textBlob.GetIntercepts(underlineYPos - paint.StrokeWidth / 2, underlineYPos + paint.StrokeWidth);
 
@@ -686,8 +687,9 @@ namespace Topten.RichTextKit
                                     ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
                                 }
                             }
-                            else if(Style.Underline == UnderlineStyle.Overline)
+                            if ((Style.Underline & UnderlineStyle.Overline) != 0)
                             {
+                                bHasUnderline = true;
                                 var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
                                 float x = XCoord;
                                 for (int i = 0; i < interceptPositions.Length; i += 2)
@@ -702,29 +704,25 @@ namespace Topten.RichTextKit
                                 if (x < XCoord + Width)
                                     ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
                             }
-                            else
+
+                            if (!bHasUnderline || (Style.Underline & UnderlineStyle.Solid) != 0)
                             {
-                                switch (Style.Underline)
+                                if ((Style.Underline & UnderlineStyle.ImeInput) != 0)
                                 {
-                                    case UnderlineStyle.ImeInput:
-                                        paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
-                                        break;
-
-                                    case UnderlineStyle.ImeConverted:
-                                        paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
-                                        break;
-
-                                    case UnderlineStyle.ImeTargetConverted:
-                                        paint.StrokeWidth *= 2;
-                                        break;
-
-                                    case UnderlineStyle.ImeTargetNonConverted:
-                                        break;
+                                    paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
                                 }
-                                // Paint solid underline
+                                if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
+                                {
+                                    paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
+                                }
+                                if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
+                                {
+                                    paint.StrokeWidth *= 2;
+                                }
                                 ctx.Canvas.DrawLine(new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
                                 paint.PathEffect = null;
                             }
+
                         }
 
                         ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
@@ -740,7 +738,7 @@ namespace Topten.RichTextKit
                 }
             }
         }
-        
+
         /// <summary>
         /// Paint background of this font run
         /// </summary>
@@ -751,9 +749,9 @@ namespace Topten.RichTextKit
 
             if (Style.BackgroundColor != SKColor.Empty && RunKind == FontRunKind.Normal)
             {
-                var rect = new SKRect(XCoord , Line.YCoord, 
+                var rect = new SKRect(XCoord, Line.YCoord,
                     XCoord + Width, Line.YCoord + Line.Height);
-                using (var skPaint = new SKPaint {Style = SKPaintStyle.Fill, Color = Style.BackgroundColor})
+                using (var skPaint = new SKPaint { Style = SKPaintStyle.Fill, Color = Style.BackgroundColor })
                 {
                     ctx.Canvas.DrawRect(rect, skPaint);
                 }

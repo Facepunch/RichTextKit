@@ -60,5 +60,10 @@ namespace Topten.RichTextKit
         /// Underline style for unconverted IME input (target clause)
         /// </summary>
         ImeTargetNonConverted,
+
+        /// <summary>
+        /// Create a line over the top of the text
+        /// </summary>
+        Overline,
     }
 }

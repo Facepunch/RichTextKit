@@ -64,6 +64,7 @@ namespace SandboxDriver
             var styleLTR = styleNormal.Modify(textDirection: TextDirection.LTR);
             var styleBold = styleNormal.Modify(fontWeight: 700);
             var styleUnderline = styleNormal.Modify(underline: UnderlineStyle.Gapped, textColor: new SKColor(0xFFFF0000));
+            var styleOverline = styleNormal.Modify(underline: UnderlineStyle.Overline, textColor: new SKColor(0xFF0000FF));
             var styleStrike = styleNormal.Modify(strikeThrough: StrikeThroughStyle.Solid);
             var styleSubScript = styleNormal.Modify(fontVariant: FontVariant.SubScript);
             var styleSuperScript = styleNormal.Modify(fontVariant: FontVariant.SuperScript);
@@ -98,6 +99,8 @@ namespace SandboxDriver
                     _textBlock.AddText("italic", styleItalic);
                     _textBlock.AddText(", ", styleNormal);
                     _textBlock.AddText("underline", styleUnderline);
+                    _textBlock.AddText(", ", styleNormal);
+                    _textBlock.AddText("overline", styleOverline);
                     _textBlock.AddText(" (including ", styleNormal);
                     _textBlock.AddText("gaps over descenders", styleUnderline);
                     _textBlock.AddText("), ", styleNormal);

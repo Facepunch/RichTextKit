@@ -662,6 +662,7 @@ namespace Topten.RichTextKit
                         {
                             // Work out underline metrics
                             float underlineYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.UnderlinePosition ?? 0);
+
                             paint.StrokeWidth = _font.Metrics.UnderlineThickness ?? 1;
 
                             if (Style.Underline == UnderlineStyle.Gapped)
@@ -684,6 +685,22 @@ namespace Topten.RichTextKit
                                 {
                                     ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
                                 }
+                            }
+                            else if(Style.Underline == UnderlineStyle.Overline)
+                            {
+                                var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
+                                float x = XCoord;
+                                for (int i = 0; i < interceptPositions.Length; i += 2)
+                                {
+                                    float b = interceptPositions[i] - paint.StrokeWidth;
+                                    if (x < b)
+                                    {
+                                        ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                    }
+                                    x = interceptPositions[i + 1] + paint.StrokeWidth;
+                                }
+                                if (x < XCoord + Width)
+                                    ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
                             }
                             else
                             {

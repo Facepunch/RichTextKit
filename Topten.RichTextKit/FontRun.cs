@@ -657,72 +657,75 @@ namespace Topten.RichTextKit
                 {
                     fixed (ushort* pGlyphs = Glyphs.Underlying)
                     {
-                        // Paint underline
-                        if (Style.Underline != UnderlineStyle.None && RunKind == FontRunKind.Normal)
+                        paint.StrokeWidth = Style.StrokeThickness ?? _font.Metrics.UnderlineThickness ?? 1;
+                        if (paint.StrokeWidth > 0)
                         {
-                            // Work out underline metrics
-                            float underlineYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.UnderlinePosition ?? 0);
-
-                            paint.StrokeWidth = _font.Metrics.UnderlineThickness ?? 1;
-                            bool bHasUnderline = false;
-                            if ((Style.Underline & UnderlineStyle.Gapped) != 0)
+                            // Paint underline
+                            if (Style.Underline != UnderlineStyle.None && RunKind == FontRunKind.Normal)
                             {
-                                bHasUnderline = true;
-                                // Get intercept positions
-                                var interceptPositions = _textBlob.GetIntercepts(underlineYPos - paint.StrokeWidth / 2, underlineYPos + paint.StrokeWidth);
+                                // Work out underline metrics
+                                float underlineYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.UnderlinePosition ?? 0);
 
-                                // Paint gapped underlinline
-                                float x = XCoord;
-                                for (int i = 0; i < interceptPositions.Length; i += 2)
+                                bool bHasUnderline = false;
+                                if ((Style.Underline & UnderlineStyle.Gapped) != 0)
                                 {
-                                    float b = interceptPositions[i] - paint.StrokeWidth;
-                                    if (x < b)
+                                    bHasUnderline = true;
+                                    // Get intercept positions
+                                    var interceptPositions = _textBlob.GetIntercepts(underlineYPos - paint.StrokeWidth / 2, underlineYPos + paint.StrokeWidth);
+
+                                    // Paint gapped underlinline
+                                    float x = XCoord;
+                                    for (int i = 0; i < interceptPositions.Length; i += 2)
                                     {
-                                        ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), paint);
+                                        float b = interceptPositions[i] - paint.StrokeWidth;
+                                        if (x < b)
+                                        {
+                                            ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), paint);
+                                        }
+                                        x = interceptPositions[i + 1] + paint.StrokeWidth;
                                     }
-                                    x = interceptPositions[i + 1] + paint.StrokeWidth;
-                                }
-                                if (x < XCoord + Width)
-                                {
-                                    ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
-                                }
-                            }
-                            if ((Style.Underline & UnderlineStyle.Overline) != 0)
-                            {
-                                bHasUnderline = true;
-                                var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
-                                float x = XCoord;
-                                for (int i = 0; i < interceptPositions.Length; i += 2)
-                                {
-                                    float b = interceptPositions[i] - paint.StrokeWidth;
-                                    if (x < b)
+                                    if (x < XCoord + Width)
                                     {
-                                        ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                        ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
                                     }
-                                    x = interceptPositions[i + 1] + paint.StrokeWidth;
                                 }
-                                if (x < XCoord + Width)
-                                    ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
-                            }
+                                if ((Style.Underline & UnderlineStyle.Overline) != 0)
+                                {
+                                    bHasUnderline = true;
+                                    var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
+                                    float x = XCoord;
+                                    for (int i = 0; i < interceptPositions.Length; i += 2)
+                                    {
+                                        float b = interceptPositions[i] - paint.StrokeWidth;
+                                        if (x < b)
+                                        {
+                                            ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                        }
+                                        x = interceptPositions[i + 1] + paint.StrokeWidth;
+                                    }
+                                    if (x < XCoord + Width)
+                                        ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
+                                }
 
-                            if (!bHasUnderline || (Style.Underline & UnderlineStyle.Solid) != 0)
-                            {
-                                if ((Style.Underline & UnderlineStyle.ImeInput) != 0)
+                                if (!bHasUnderline || (Style.Underline & UnderlineStyle.Solid) != 0)
                                 {
-                                    paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
+                                    if ((Style.Underline & UnderlineStyle.ImeInput) != 0)
+                                    {
+                                        paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
+                                    }
+                                    if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
+                                    {
+                                        paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
+                                    }
+                                    if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
+                                    {
+                                        paint.StrokeWidth *= 2;
+                                    }
+                                    ctx.Canvas.DrawLine(new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
+                                    paint.PathEffect = null;
                                 }
-                                if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
-                                {
-                                    paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
-                                }
-                                if ((Style.Underline & UnderlineStyle.ImeConverted) != 0)
-                                {
-                                    paint.StrokeWidth *= 2;
-                                }
-                                ctx.Canvas.DrawLine(new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
-                                paint.PathEffect = null;
-                            }
 
+                            }
                         }
                         paint.Color = Style.TextColor;
                         ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
@@ -733,9 +736,12 @@ namespace Topten.RichTextKit
                 if (Style.StrikeThrough != StrikeThroughStyle.None && RunKind == FontRunKind.Normal)
                 {
                     paint.Color = Style.UnderlineColor ?? Style.TextColor;
-                    paint.StrokeWidth = _font.Metrics.StrikeoutThickness ?? 0;
-                    float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;
-                    ctx.Canvas.DrawLine(new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), paint);
+                    paint.StrokeWidth = Style.StrokeThickness ??_font.Metrics.StrikeoutThickness ?? 0;
+                    if (paint.StrokeWidth > 0)
+                    {
+                        float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;
+                        ctx.Canvas.DrawLine(new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), paint);
+                    }
                 }
             }
         }

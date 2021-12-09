@@ -72,6 +72,11 @@ namespace Topten.RichTextKit
         /// The text underline color in this run.
         /// </summary>
         SKColor? UnderlineColor { get; }
+
+        /// <summary>
+        /// The text underline or strike through thickness in this run.
+        /// </summary>
+        float? StrokeThickness { get; }
         
         /// <summary>
         /// The background color of this run.

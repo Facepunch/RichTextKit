@@ -675,14 +675,17 @@ namespace Topten.RichTextKit
 
                                     // Paint gapped underlinline
                                     float x = XCoord;
-                                    for (int i = 0; i < interceptPositions.Length; i += 2)
+                                    if (Style.StrokeInkSkip)
                                     {
-                                        float b = interceptPositions[i] - paint.StrokeWidth;
-                                        if (x < b)
+                                        for (int i = 0; i < interceptPositions.Length; i += 2)
                                         {
-                                            ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), paint);
+                                            float b = interceptPositions[i] - paint.StrokeWidth;
+                                            if (x < b)
+                                            {
+                                                ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), paint);
+                                            }
+                                            x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
-                                        x = interceptPositions[i + 1] + paint.StrokeWidth;
                                     }
                                     if (x < XCoord + Width)
                                     {
@@ -694,14 +697,17 @@ namespace Topten.RichTextKit
                                     bHasUnderline = true;
                                     var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
                                     float x = XCoord;
-                                    for (int i = 0; i < interceptPositions.Length; i += 2)
+                                    if (Style.StrokeInkSkip)
                                     {
-                                        float b = interceptPositions[i] - paint.StrokeWidth;
-                                        if (x < b)
+                                        for (int i = 0; i < interceptPositions.Length; i += 2)
                                         {
-                                            ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                            float b = interceptPositions[i] - paint.StrokeWidth;
+                                            if (x < b)
+                                            {
+                                                ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                            }
+                                            x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
-                                        x = interceptPositions[i + 1] + paint.StrokeWidth;
                                     }
                                     if (x < XCoord + Width)
                                         ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
@@ -736,7 +742,7 @@ namespace Topten.RichTextKit
                 if (Style.StrikeThrough != StrikeThroughStyle.None && RunKind == FontRunKind.Normal)
                 {
                     paint.Color = Style.UnderlineColor ?? Style.TextColor;
-                    paint.StrokeWidth = Style.StrokeThickness ??_font.Metrics.StrikeoutThickness ?? 0;
+                    paint.StrokeWidth = Style.StrokeThickness ?? _font.Metrics.StrikeoutThickness ?? 0;
                     if (paint.StrokeWidth > 0)
                     {
                         float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;

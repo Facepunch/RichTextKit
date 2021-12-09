@@ -132,6 +132,15 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
+        /// Sets whether to draw underlines or overlines over glyphs or not
+        /// </summary>
+        public bool StrokeInkSkip
+        {
+            get => _strokeInkSkip;
+            set { CheckNotSealed(); _strokeInkSkip = value; }
+        }
+
+        /// <summary>
         /// The background color of this run (no background is painted by default).
         /// </summary>
         public SKColor BackgroundColor
@@ -215,6 +224,7 @@ namespace Topten.RichTextKit
         SKColor _textColor = new SKColor(0xFF000000);
         SKColor? _underlineColor = null;
         float? _strokeThickness = null;
+        bool _strokeInkSkip = true;
         SKColor _backgroundColor = SKColor.Empty;
         float _letterSpacing;
         FontVariant _fontVariant;
@@ -245,6 +255,7 @@ namespace Topten.RichTextKit
         /// <param name="replacementCharacter">The new replacement character</param>
         /// <param name="underlineColor">The stroke color</param>
         /// <param name="strokeThickness">The thickness of the strike-through/underline stroke</param>
+        /// <param name="strokeInkSkip">Decides whether underlines or overlines draw over glyphs or not</param>
         /// <returns>A new style with the passed attributes changed</returns>
         public Style Modify(
                string fontFamily = null,
@@ -261,7 +272,8 @@ namespace Topten.RichTextKit
                TextDirection? textDirection = null,
                char? replacementCharacter = null,
                SKColor? underlineColor = null,
-               float? strokeThickness = null
+               float? strokeThickness = null,
+               bool? strokeInkSkip = null
             )
         {
             // Resolve new style against current style
@@ -281,7 +293,8 @@ namespace Topten.RichTextKit
                 TextDirection = textDirection ?? this.TextDirection,
                 ReplacementCharacter = replacementCharacter ?? this.ReplacementCharacter,
                 UnderlineColor = underlineColor ?? this.UnderlineColor,
-                StrokeThickness = strokeThickness ?? this.StrokeThickness
+                StrokeThickness = strokeThickness ?? this.StrokeThickness,
+                StrokeInkSkip = strokeInkSkip ?? this.StrokeInkSkip
             };
         }
     }

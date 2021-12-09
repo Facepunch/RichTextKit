@@ -77,6 +77,11 @@ namespace Topten.RichTextKit
         /// The text underline or strike through thickness in this run.
         /// </summary>
         float? StrokeThickness { get; }
+
+        /// <summary>
+        /// Decide whether to draw strokes over glyphs or not
+        /// </summary>
+        bool StrokeInkSkip { get; }
         
         /// <summary>
         /// The background color of this run.

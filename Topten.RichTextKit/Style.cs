@@ -114,6 +114,15 @@ namespace Topten.RichTextKit
         }
         
         /// <summary>
+        /// The underline color for the text in this run (defaults to the current text color)
+        /// </summary>
+        public SKColor? UnderlineColor
+        {
+            get => _underlineColor;
+            set { CheckNotSealed(); _underlineColor = value; }
+        }
+
+        /// <summary>
         /// The background color of this run (no background is painted by default).
         /// </summary>
         public SKColor BackgroundColor
@@ -195,6 +204,7 @@ namespace Topten.RichTextKit
         StrikeThroughStyle _strikeThrough;
         float _lineHeight = 1.0f;
         SKColor _textColor = new SKColor(0xFF000000);
+        SKColor? _underlineColor = null;
         SKColor _backgroundColor = SKColor.Empty;
         float _letterSpacing;
         FontVariant _fontVariant;
@@ -237,7 +247,8 @@ namespace Topten.RichTextKit
                float? letterSpacing = null,
                FontVariant? fontVariant = null,
                TextDirection? textDirection = null,
-               char? replacementCharacter = null
+               char? replacementCharacter = null,
+               SKColor? underlineColor = null
             )
         {
             // Resolve new style against current style
@@ -256,6 +267,7 @@ namespace Topten.RichTextKit
                 FontVariant = fontVariant ?? this.FontVariant,
                 TextDirection = textDirection ?? this.TextDirection,
                 ReplacementCharacter = replacementCharacter ?? this.ReplacementCharacter,
+                UnderlineColor = underlineColor ?? this.UnderlineColor
             };
         }
     }

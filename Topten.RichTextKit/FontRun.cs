@@ -649,7 +649,7 @@ namespace Topten.RichTextKit
             using (var paint = new SKPaint())
             {
                 // Setup SKPaint
-                paint.Color = Style.TextColor;
+                paint.Color = Style.UnderlineColor ?? Style.TextColor;
 
                 var glyphVOffset = CreateTextBlob(ctx);
 
@@ -724,7 +724,7 @@ namespace Topten.RichTextKit
                             }
 
                         }
-
+                        paint.Color = Style.TextColor;
                         ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
                     }
                 }
@@ -732,6 +732,7 @@ namespace Topten.RichTextKit
                 // Paint strikethrough
                 if (Style.StrikeThrough != StrikeThroughStyle.None && RunKind == FontRunKind.Normal)
                 {
+                    paint.Color = Style.UnderlineColor ?? Style.TextColor;
                     paint.StrokeWidth = _font.Metrics.StrikeoutThickness ?? 0;
                     float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;
                     ctx.Canvas.DrawLine(new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), paint);

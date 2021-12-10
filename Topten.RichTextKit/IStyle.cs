@@ -59,6 +59,21 @@ namespace Topten.RichTextKit
         UnderlineType UnderlineStrokeType { get; }
 
         /// <summary>
+        /// Y Offset for the underline, this value is added to the base value!
+        /// </summary>
+        float UnderlineOffset { get; }
+
+        /// <summary>
+        /// Y Offset for the overline, this value is added to the base value!
+        /// </summary>
+        float OverlineOffset { get; }
+
+        /// <summary>
+        /// Y Offset for the strikethrough, this value is added to the base value!
+        /// </summary>
+        float StrikeThroughOffset { get; }
+
+        /// <summary>
         /// The strike through style for the text in this run
         /// </summary>
         StrikeThroughStyle StrikeThrough { get; }

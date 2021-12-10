@@ -733,6 +733,12 @@ namespace Topten.RichTextKit
                     fixed (ushort* pGlyphs = Glyphs.Underlying)
                     {
                         paint.StrokeWidth = Style.StrokeThickness ?? _font.Metrics.UnderlineThickness ?? 1;
+                        SKColor skColor = paint.Color;
+                        {
+                            paint.Color = Style.TextColor;
+                            ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
+                        }
+                        paint.Color = skColor;
                         if (paint.StrokeWidth > 0)
                         {
                             // Paint underline
@@ -744,9 +750,10 @@ namespace Topten.RichTextKit
                                 bool bHasUnderline = false;
                                 if ((Style.Underline & UnderlineStyle.Gapped) != 0)
                                 {
+                                    float flUnderlineOffset = underlineYPos + Style.UnderlineOffset;
                                     bHasUnderline = true;
                                     // Get intercept positions
-                                    var interceptPositions = _textBlob.GetIntercepts(underlineYPos - paint.StrokeWidth / 2, underlineYPos + paint.StrokeWidth);
+                                    var interceptPositions = _textBlob.GetIntercepts(flUnderlineOffset - paint.StrokeWidth / 2, flUnderlineOffset + paint.StrokeWidth);
 
                                     // Paint gapped underlinline
                                     float x = XCoord;
@@ -757,20 +764,21 @@ namespace Topten.RichTextKit
                                             float b = interceptPositions[i] - paint.StrokeWidth;
                                             if (x < b)
                                             {
-                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), false);
+                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, flUnderlineOffset), new SKPoint(b, flUnderlineOffset), false);
                                             }
                                             x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
                                     }
                                     if (x < XCoord + Width)
                                     {
-                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), false);
+                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, flUnderlineOffset), new SKPoint(XCoord + Width, flUnderlineOffset), false);
                                     }
                                 }
                                 if ((Style.Underline & UnderlineStyle.Overline) != 0)
                                 {
+                                    float flOverlineOffset = Line.YCoord + Style.OverlineOffset;
                                     bHasUnderline = true;
-                                    var interceptPositions = _textBlob.GetIntercepts(Line.YCoord - paint.StrokeWidth / 2, Line.YCoord + paint.StrokeWidth);
+                                    var interceptPositions = _textBlob.GetIntercepts(flOverlineOffset - paint.StrokeWidth / 2, flOverlineOffset + paint.StrokeWidth);
                                     float x = XCoord;
                                     if (Style.StrokeInkSkip)
                                     {
@@ -779,17 +787,18 @@ namespace Topten.RichTextKit
                                             float b = interceptPositions[i] - paint.StrokeWidth;
                                             if (x < b)
                                             {
-                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), true);
+                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, flOverlineOffset), new SKPoint(b, flOverlineOffset), true);
                                             }
                                             x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
                                     }
                                     if (x < XCoord + Width)
-                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), true);
+                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, flOverlineOffset), new SKPoint(x + Width, flOverlineOffset), true);
                                 }
 
                                 if (!bHasUnderline || (Style.Underline & UnderlineStyle.Solid) != 0)
                                 {
+                                    float flUnderlineOffset = underlineYPos + Style.UnderlineOffset;
                                     if ((Style.Underline & UnderlineStyle.ImeInput) != 0)
                                     {
                                         paint.PathEffect = SKPathEffect.CreateDash(new float[] { paint.StrokeWidth, paint.StrokeWidth }, paint.StrokeWidth);
@@ -802,14 +811,12 @@ namespace Topten.RichTextKit
                                     {
                                         paint.StrokeWidth *= 2;
                                     }
-                                    DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), false);
+                                    DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(XCoord, flUnderlineOffset), new SKPoint(XCoord + Width, flUnderlineOffset), false);
                                     paint.PathEffect = null;
                                 }
 
                             }
                         }
-                        paint.Color = Style.TextColor;
-                        ctx.Canvas.DrawText(_textBlob, 0, 0, paint);
                     }
                 }
 
@@ -820,7 +827,7 @@ namespace Topten.RichTextKit
                     paint.StrokeWidth = Style.StrokeThickness ?? _font.Metrics.StrikeoutThickness ?? 0;
                     if (paint.StrokeWidth > 0)
                     {
-                        float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;
+                        float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset + Style.StrikeThroughOffset;
                         DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), false);
                     }
                 }

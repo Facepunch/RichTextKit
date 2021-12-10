@@ -141,6 +141,33 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
+        /// Y Offset for the underline, this value is added to the base value!
+        /// </summary>
+        public float UnderlineOffset
+        {
+            get => _underlineOffset;
+            set { CheckNotSealed(); _underlineOffset = value;}
+        }
+
+        /// <summary>
+        /// Y Offset for the overline, this value is added to the base value!
+        /// </summary>
+        public float OverlineOffset
+        {
+            get => _overlineOffset;
+            set { CheckNotSealed(); _overlineOffset = value; }
+        }
+
+        /// <summary>
+        /// Y Offset for the strike-through, this value is added to the base value!
+        /// </summary>
+        public float StrikeThroughOffset
+        {
+            get => _strikethroughOffset;
+            set { CheckNotSealed(); _strikethroughOffset = value; }
+        }
+
+        /// <summary>
         /// Sets the stroke line style for underline/overline/strike throughs
         /// </summary>
         public UnderlineType UnderlineStrokeType
@@ -234,6 +261,9 @@ namespace Topten.RichTextKit
         SKColor? _underlineColor = null;
         float? _strokeThickness = null;
         bool _strokeInkSkip = true;
+        float _underlineOffset = 0.0f;
+        float _overlineOffset = 0.0f;
+        float _strikethroughOffset = 0.0f;
         UnderlineType _underlineType = UnderlineType.Solid;
         SKColor _backgroundColor = SKColor.Empty;
         float _letterSpacing;
@@ -266,6 +296,10 @@ namespace Topten.RichTextKit
         /// <param name="underlineColor">The stroke color</param>
         /// <param name="strokeThickness">The thickness of the strike-through/underline stroke</param>
         /// <param name="strokeInkSkip">Decides whether underlines or overlines draw over glyphs or not</param>
+        /// <param name="strokeUnderlineType">Specify the style for how the line should be drawn</param>
+        /// <param name="underlineOffset">Adds an offset to the base underline offset</param>
+        /// <param name="overlineOffset">Adds an offset to the base overline offset</param>
+        /// <param name="strikethroughOffset">Adds an offset to the base strike-through offset</param>
         /// <returns>A new style with the passed attributes changed</returns>
         public Style Modify(
                string fontFamily = null,
@@ -284,7 +318,10 @@ namespace Topten.RichTextKit
                SKColor? underlineColor = null,
                float? strokeThickness = null,
                bool? strokeInkSkip = null,
-               UnderlineType? strokeUnderlineType = null
+               UnderlineType? strokeUnderlineType = null,
+               float? underlineOffset = null,
+               float? overlineOffset = null,
+               float? strikethroughOffset = null
             )
         {
             // Resolve new style against current style
@@ -306,7 +343,10 @@ namespace Topten.RichTextKit
                 UnderlineColor = underlineColor ?? this.UnderlineColor,
                 StrokeThickness = strokeThickness ?? this.StrokeThickness,
                 StrokeInkSkip = strokeInkSkip ?? this.StrokeInkSkip,
-                UnderlineStrokeType = strokeUnderlineType ?? this.UnderlineStrokeType
+                UnderlineStrokeType = strokeUnderlineType ?? this.UnderlineStrokeType,
+                UnderlineOffset = underlineOffset ?? this.UnderlineOffset,
+                OverlineOffset = overlineOffset ?? this.OverlineOffset,
+                StrikeThroughOffset = strikethroughOffset ?? this.StrikeThroughOffset
             };
         }
     }

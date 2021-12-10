@@ -563,6 +563,80 @@ namespace Topten.RichTextKit
             }
         }
 
+        internal void DrawStrokeLine(UnderlineType underlineType, SKCanvas skCanvas, SKPaint sKPaint, SKPoint startPoint, SKPoint endPoint, bool isOverline)
+        {
+            if (underlineType == UnderlineType.Solid)
+            {
+                skCanvas.DrawLine(startPoint, endPoint, sKPaint);
+            }
+            else if (underlineType == UnderlineType.Dashed)
+            {
+                float strokeWidth = sKPaint.StrokeWidth;
+                SKPathEffect previousPathEffect = sKPaint.PathEffect;
+                {
+                    sKPaint.PathEffect = SKPathEffect.CreateDash(new float[] { strokeWidth * 3.0f, strokeWidth * 3.0f }, strokeWidth);
+                    skCanvas.DrawLine(startPoint, endPoint, sKPaint);
+                }
+                sKPaint.PathEffect = previousPathEffect;
+            }
+            else if (underlineType == UnderlineType.Dotted)
+            {
+                float strokeWidth = sKPaint.StrokeWidth;
+                SKStrokeCap sKStrokeCap = sKPaint.StrokeCap;
+                bool hasAA = sKPaint.IsAntialias;
+                SKPathEffect previousPathEffect = sKPaint.PathEffect;
+                {
+                    sKPaint.StrokeCap = SKStrokeCap.Round;
+                    sKPaint.IsAntialias = true;
+                    sKPaint.PathEffect = SKPathEffect.CreateDash(new float[] { 0.0f, strokeWidth * 2.0f }, 0.0f);
+                    skCanvas.DrawLine(startPoint, endPoint, sKPaint);
+                }
+                sKPaint.IsAntialias = hasAA;
+                sKPaint.StrokeCap = sKStrokeCap;
+                sKPaint.PathEffect = previousPathEffect;
+            }
+            else if (underlineType == UnderlineType.Double)
+            {
+                float strokeWidth = sKPaint.StrokeWidth;
+                SKPathEffect previousPathEffect = sKPaint.PathEffect;
+                {
+                    SKPoint skOffset = new SKPoint(0, strokeWidth * 2.0f);
+                    if (isOverline)
+                        skOffset.Y *= -1.0f;
+
+                    skCanvas.DrawLine(startPoint, endPoint, sKPaint);
+                    skCanvas.DrawLine(startPoint + skOffset, endPoint + skOffset, sKPaint);
+                }
+                sKPaint.PathEffect = previousPathEffect;
+            }
+            else if (underlineType == UnderlineType.Wavy)
+            {
+                // Since skia doesn't have this, we gotta make it ourselves
+                using (SKPath path = new SKPath())
+                {
+                    float totalWidth = endPoint.X - startPoint.X;
+                    path.MoveTo(startPoint);
+                    for (float i = 0; i < totalWidth; i++)
+                    {
+                        path.LineTo(startPoint.X + i, startPoint.Y + (float)(Math.Sin(i * 0.25f) * 1.25f));
+                    }
+
+                    bool hasAA = sKPaint.IsAntialias;
+                    SKPaintStyle sKPaintStyle = sKPaint.Style;
+                    SKStrokeCap sKStrokeCap = sKPaint.StrokeCap;
+                    {
+                        sKPaint.IsAntialias = true;
+                        sKPaint.StrokeCap = SKStrokeCap.Round;
+                        sKPaint.Style = SKPaintStyle.Stroke;
+                        skCanvas.DrawPath(path, sKPaint);
+                    }
+                    sKPaint.IsAntialias = hasAA;
+                    sKPaint.StrokeCap = sKStrokeCap;
+                    sKPaint.Style = sKPaintStyle;
+                }
+            }
+        }
+
         /// <summary>
         /// Paint this font run
         /// </summary>
@@ -646,6 +720,7 @@ namespace Topten.RichTextKit
                 return;
 
             // Text 
+
             using (var paint = new SKPaint())
             {
                 // Setup SKPaint
@@ -682,14 +757,14 @@ namespace Topten.RichTextKit
                                             float b = interceptPositions[i] - paint.StrokeWidth;
                                             if (x < b)
                                             {
-                                                ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), paint);
+                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, underlineYPos), new SKPoint(b, underlineYPos), false);
                                             }
                                             x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
                                     }
                                     if (x < XCoord + Width)
                                     {
-                                        ctx.Canvas.DrawLine(new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
+                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), false);
                                     }
                                 }
                                 if ((Style.Underline & UnderlineStyle.Overline) != 0)
@@ -704,13 +779,13 @@ namespace Topten.RichTextKit
                                             float b = interceptPositions[i] - paint.StrokeWidth;
                                             if (x < b)
                                             {
-                                                ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), paint);
+                                                DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, Line.YCoord), new SKPoint(b, Line.YCoord), true);
                                             }
                                             x = interceptPositions[i + 1] + paint.StrokeWidth;
                                         }
                                     }
                                     if (x < XCoord + Width)
-                                        ctx.Canvas.DrawLine(new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), paint);
+                                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(x, Line.YCoord), new SKPoint(x + Width, Line.YCoord), true);
                                 }
 
                                 if (!bHasUnderline || (Style.Underline & UnderlineStyle.Solid) != 0)
@@ -727,7 +802,7 @@ namespace Topten.RichTextKit
                                     {
                                         paint.StrokeWidth *= 2;
                                     }
-                                    ctx.Canvas.DrawLine(new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), paint);
+                                    DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(XCoord, underlineYPos), new SKPoint(XCoord + Width, underlineYPos), false);
                                     paint.PathEffect = null;
                                 }
 
@@ -746,7 +821,7 @@ namespace Topten.RichTextKit
                     if (paint.StrokeWidth > 0)
                     {
                         float strikeYPos = Line.YCoord + Line.BaseLine + (_font.Metrics.StrikeoutPosition ?? 0) + glyphVOffset;
-                        ctx.Canvas.DrawLine(new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), paint);
+                        DrawStrokeLine(Style.UnderlineStrokeType, ctx.Canvas, paint, new SKPoint(XCoord, strikeYPos), new SKPoint(XCoord + Width, strikeYPos), false);
                     }
                 }
             }

@@ -54,6 +54,11 @@ namespace Topten.RichTextKit
         UnderlineStyle Underline { get; }
 
         /// <summary>
+        /// The style of the line drawn for over/under/strike through lines
+        /// </summary>
+        UnderlineType UnderlineStrokeType { get; }
+
+        /// <summary>
         /// The strike through style for the text in this run
         /// </summary>
         StrikeThroughStyle StrikeThrough { get; }

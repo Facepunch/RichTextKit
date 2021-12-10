@@ -141,6 +141,15 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
+        /// Sets the stroke line style for underline/overline/strike throughs
+        /// </summary>
+        public UnderlineType UnderlineStrokeType
+        {
+            get => _underlineType;
+            set { CheckNotSealed(); _underlineType = value; }
+        }
+
+        /// <summary>
         /// The background color of this run (no background is painted by default).
         /// </summary>
         public SKColor BackgroundColor
@@ -225,6 +234,7 @@ namespace Topten.RichTextKit
         SKColor? _underlineColor = null;
         float? _strokeThickness = null;
         bool _strokeInkSkip = true;
+        UnderlineType _underlineType = UnderlineType.Solid;
         SKColor _backgroundColor = SKColor.Empty;
         float _letterSpacing;
         FontVariant _fontVariant;
@@ -273,7 +283,8 @@ namespace Topten.RichTextKit
                char? replacementCharacter = null,
                SKColor? underlineColor = null,
                float? strokeThickness = null,
-               bool? strokeInkSkip = null
+               bool? strokeInkSkip = null,
+               UnderlineType? strokeUnderlineType = null
             )
         {
             // Resolve new style against current style
@@ -294,7 +305,8 @@ namespace Topten.RichTextKit
                 ReplacementCharacter = replacementCharacter ?? this.ReplacementCharacter,
                 UnderlineColor = underlineColor ?? this.UnderlineColor,
                 StrokeThickness = strokeThickness ?? this.StrokeThickness,
-                StrokeInkSkip = strokeInkSkip ?? this.StrokeInkSkip
+                StrokeInkSkip = strokeInkSkip ?? this.StrokeInkSkip,
+                UnderlineStrokeType = strokeUnderlineType ?? this.UnderlineStrokeType
             };
         }
     }

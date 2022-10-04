@@ -131,6 +131,15 @@ namespace Topten.RichTextKit
         } = SKFontHinting.Normal;
 
         /// <summary>
+        /// A gradient used when rendering text
+        /// </summary>
+        public TextGradient TextGradient
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A default set of paint options that renders text blocks without 
         /// a selection range.
         /// </summary>

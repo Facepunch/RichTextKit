@@ -51,21 +51,22 @@ namespace Topten.RichTextKit
             startPoint = rotation.MapPoint(startPoint);
             endPoint = rotation.MapPoint(endPoint);
 
-            var sx = Math.Abs(endPoint.X - startPoint.X);
-            var sy = Math.Abs(endPoint.Y - startPoint.Y);
-            if (sx == 0) sx = 1;
-            if (sy == 0) sy = 1;
-
-            sx = width / sx;
-            sy = height / sy;
-
-            var localTranslation = SKMatrix.CreateTranslation(offsetx, 0);
-            var localScale = SKMatrix.CreateScale(sx, sy, width * .5f, height * .5f);
-            var localMatrix = SKMatrix.Concat(localTranslation, localScale);
+            var localMatrix = SKMatrix.CreateTranslation(offsetx, 0);
 
             if (GradientType == GradientType.Linear)
             {
-                return SKShader.CreateLinearGradient( startPoint, endPoint, Colors, Positions, SKShaderTileMode.Decal, localMatrix);
+                var sx = Math.Abs(endPoint.X - startPoint.X);
+                var sy = Math.Abs(endPoint.Y - startPoint.Y);
+                if (sx == 0) sx = 1;
+                if (sy == 0) sy = 1;
+
+                sx = width / sx;
+                sy = height / sy;
+
+                var localScale = SKMatrix.CreateScale(sx, sy, width * .5f, height * .5f);
+                localMatrix = SKMatrix.Concat(localMatrix, localScale);
+
+                return SKShader.CreateLinearGradient( startPoint, endPoint, Colors, Positions, SKShaderTileMode.Clamp, localMatrix);
             }
 
             if(GradientType == GradientType.Radial)

@@ -12,7 +12,7 @@ namespace Topten.RichTextKit
     {
 
         public SKPoint Center { get; set; }
-        public float Radius { get; set; }
+        public RadialSizeMode SizeMode { get; set; }
         public GradientType GradientType { get; set; }
         public SKColor[] Colors { get; set; }
         public float[] Positions { get; set; }
@@ -29,7 +29,7 @@ namespace Topten.RichTextKit
             };
         }
 
-        public static TextGradient Radial(SKColor[] colors, float[] positions, float angle, SKPoint center, float radius)
+        public static TextGradient Radial(SKColor[] colors, float[] positions, float angle, SKPoint center, RadialSizeMode sizeMode)
         {
             return new TextGradient()
             {
@@ -38,7 +38,7 @@ namespace Topten.RichTextKit
                 Positions = positions,
                 Angle = angle,
                 Center = center,
-                Radius = radius
+                SizeMode = sizeMode
             };
         }
 
@@ -71,8 +71,55 @@ namespace Topten.RichTextKit
 
             if(GradientType == GradientType.Radial)
             {
-                var radius = Math.Max( width, height ) * Radius;
                 var center = new SKPoint(width * Center.X, height * Center.Y);
+                var radius = Math.Max(width, height);
+                var scaleY = 1.0f;
+                var scaleX = 1.0f;
+
+                var top = center.Y;
+                var bottom = height - center.Y;
+                var left = center.X;
+                var right = width - center.X;
+
+                var tl = center;
+                var tr = new SKPoint(width, 0) - center;
+                var br = new SKPoint(width, height) - center;
+                var bl = new SKPoint(0, height) - center;
+
+                switch (SizeMode)
+                {
+                    case RadialSizeMode.Circle:
+                        scaleX = Math.Min(left, right) / width;
+                        scaleY = Math.Min(top, bottom) / height;
+                        break;
+                    case RadialSizeMode.ClosestSide:
+                        scaleX = Math.Min(left, right) / width;
+                        scaleY = Math.Min(top, bottom) / height;
+                        break;
+                    case RadialSizeMode.FarthestSide:
+                        scaleX = Math.Max(left, right) / width;
+                        scaleY = Math.Max(top, bottom) / height;
+                        break;
+                    case RadialSizeMode.ClosestCorner:
+                        var closestCorner = new SKPoint[] { tl, tr, br, bl }.OrderBy( x => x.Length ).First();
+                        scaleX = closestCorner.X / width;
+                        scaleY = closestCorner.Y / height;
+                        break;
+                    case RadialSizeMode.FarthestCorner:
+                        var furthestCorner = new SKPoint[] { tl, tr, br, bl }.OrderByDescending(x => x.Length).First();
+                        scaleX = furthestCorner.X / width;
+                        scaleY = furthestCorner.Y / height;
+                        break;
+                }
+
+                if(SizeMode != RadialSizeMode.Circle)
+                {
+                    scaleX *= width / radius;
+                    scaleY *= height / radius;
+                }
+
+                localMatrix = SKMatrix.Concat(localMatrix, SKMatrix.CreateScale(scaleX, scaleY, center.X, center.Y));
+
                 return SKShader.CreateRadialGradient(center, radius, Colors, Positions, SKShaderTileMode.Clamp, localMatrix);
             }
 
@@ -83,8 +130,17 @@ namespace Topten.RichTextKit
 
     public enum GradientType
     {
-        Linear,
-        Radial
+        Linear = 0,
+        Radial = 1
+    }
+
+    public enum RadialSizeMode
+    {
+        FarthestSide = 0,
+        FarthestCorner = 1,
+        ClosestSide = 2,
+        ClosestCorner = 3,
+        Circle = 4
     }
 
 }

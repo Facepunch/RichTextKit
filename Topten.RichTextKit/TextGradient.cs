@@ -71,7 +71,9 @@ namespace Topten.RichTextKit
 
             if(GradientType == GradientType.Radial)
             {
-                return SKShader.CreateRadialGradient(Center, Radius, Colors, Positions, SKShaderTileMode.Clamp, localMatrix);
+                var radius = Math.Max( width, height ) * Radius;
+                var center = new SKPoint(width * Center.X, height * Center.Y);
+                return SKShader.CreateRadialGradient(center, radius, Colors, Positions, SKShaderTileMode.Clamp, localMatrix);
             }
 
             return null;

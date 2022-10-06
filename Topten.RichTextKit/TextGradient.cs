@@ -89,26 +89,23 @@ namespace Topten.RichTextKit
                 switch (SizeMode)
                 {
                     case RadialSizeMode.Circle:
-                        scaleX = Math.Min(left, right) / width;
-                        scaleY = Math.Min(top, bottom) / height;
-                        break;
-                    case RadialSizeMode.ClosestSide:
-                        scaleX = Math.Min(left, right) / width;
-                        scaleY = Math.Min(top, bottom) / height;
-                        break;
                     case RadialSizeMode.FarthestSide:
                         scaleX = Math.Max(left, right) / width;
                         scaleY = Math.Max(top, bottom) / height;
-                        break;
-                    case RadialSizeMode.ClosestCorner:
-                        var closestCorner = new SKPoint[] { tl, tr, br, bl }.OrderBy( x => x.Length ).First();
-                        scaleX = closestCorner.X / width;
-                        scaleY = closestCorner.Y / height;
                         break;
                     case RadialSizeMode.FarthestCorner:
                         var furthestCorner = new SKPoint[] { tl, tr, br, bl }.OrderByDescending(x => x.Length).First();
                         scaleX = furthestCorner.X / width;
                         scaleY = furthestCorner.Y / height;
+                        break;
+                    case RadialSizeMode.ClosestSide:
+                        scaleX = Math.Min(left, right) / width;
+                        scaleY = Math.Min(top, bottom) / height;
+                        break;
+                    case RadialSizeMode.ClosestCorner:
+                        var closestCorner = new SKPoint[] { tl, tr, br, bl }.OrderBy( x => x.Length ).First();
+                        scaleX = closestCorner.X / width;
+                        scaleY = closestCorner.Y / height;
                         break;
                 }
 

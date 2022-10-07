@@ -95,8 +95,8 @@ namespace Topten.RichTextKit
                         break;
                     case RadialSizeMode.FarthestCorner:
                         var furthestCorner = new SKPoint[] { tl, tr, br, bl }.OrderByDescending(x => x.Length).First();
-                        scaleX = furthestCorner.X / width;
-                        scaleY = furthestCorner.Y / height;
+                        scaleX = furthestCorner.X / (width * .71f);
+                        scaleY = furthestCorner.Y / (height * .71f);
                         break;
                     case RadialSizeMode.ClosestSide:
                         scaleX = Math.Min(left, right) / width;
@@ -104,8 +104,8 @@ namespace Topten.RichTextKit
                         break;
                     case RadialSizeMode.ClosestCorner:
                         var closestCorner = new SKPoint[] { tl, tr, br, bl }.OrderBy( x => x.Length ).First();
-                        scaleX = closestCorner.X / width;
-                        scaleY = closestCorner.Y / height;
+                        scaleX = closestCorner.X / (width * .71f);
+                        scaleY = closestCorner.Y / (height * .71f);
                         break;
                 }
 

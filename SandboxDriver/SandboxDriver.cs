@@ -11,7 +11,7 @@ namespace SandboxDriver
             FontMapper.Default = new SandboxFontMapper();
         }
 
-        public int ContentModeCount = 14;
+        public int ContentModeCount = 15;
         public int ContentMode = 0;
         public TextDirection BaseDirection = TextDirection.LTR;
         public TextAlignment TextAlignment = TextAlignment.Auto;
@@ -79,8 +79,12 @@ namespace SandboxDriver
             shadowEffect.Width += 2 * 0.25f;
             styleShadow.AddEffect(shadowEffect);
 
-            var outlineEffect = TextEffect.Outline(new SKColor(0xFFFF0000), 1);
+            var outlineEffect = TextEffect.Outline(SKColors.Black, 4);
             styleShadow.AddEffect(outlineEffect);
+
+            var styleHeadingWithEffects = styleHeading.Modify();
+            styleHeadingWithEffects.AddEffect(shadowEffect);
+            styleHeadingWithEffects.AddEffect(outlineEffect);
 
             _textBlock.Clear();
             _textBlock.MaxWidth = width;
@@ -88,6 +92,8 @@ namespace SandboxDriver
 
             _textBlock.BaseDirection = BaseDirection;
             _textBlock.Alignment = TextAlignment;
+
+            TextGradient blockGradient = null;
 
             switch (ContentMode)
             {
@@ -239,6 +245,18 @@ namespace SandboxDriver
                     //_textBlock.AddText("Password \nAnother \n", stylePassword);
                     _textBlock.AddText("Hello World\u2029", styleNormal);
                     break;
+
+                case 14:
+                    _textBlock.AddText("Hello, text gradient\nHello, text gradient\n🌐🍪🍕🚀\nHello, text gradient\nHello, text gradient\n", styleHeadingWithEffects);
+                    blockGradient = TextGradient.Linear(new SKColor[]
+                    {
+                        SKColors.DodgerBlue,
+                        SKColors.Salmon,
+                        SKColors.GreenYellow
+                    }, null, 45);
+
+                    break;
+
             }
 
             var sw = new Stopwatch();
@@ -252,6 +270,7 @@ namespace SandboxDriver
                 Hinting = Hinting,
                 Edging = Edging,
                 SubpixelPositioning = SubpixelPositioning,
+                TextGradient = blockGradient
             };
 
             HitTestResult? htr = null;

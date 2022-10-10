@@ -725,6 +725,7 @@ namespace Topten.RichTextKit
             {
                 // Setup SKPaint
                 paint.Color = Style.UnderlineColor ?? Style.TextColor;
+                paint.Shader = ctx.Shader;
 
                 var glyphVOffset = CreateTextBlob(ctx);
 

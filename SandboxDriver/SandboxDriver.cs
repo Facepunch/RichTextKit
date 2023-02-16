@@ -11,7 +11,7 @@ namespace SandboxDriver
             FontMapper.Default = new SandboxFontMapper();
         }
 
-        public int ContentModeCount = 15;
+        public int ContentModeCount = 16;
         public int ContentMode = 0;
         public TextDirection BaseDirection = TextDirection.LTR;
         public TextAlignment TextAlignment = TextAlignment.Auto;
@@ -254,6 +254,14 @@ namespace SandboxDriver
                         SKColors.Salmon,
                         SKColors.GreenYellow
                     }, null, 45);
+
+                    break;
+
+                case 15:
+                    _textBlock.OverflowContent = "ellipsis";
+                    _textBlock.AddText("This one is 150px in length", styleNormal);
+                    _textBlock.MaxWidth = 135;
+                    _textBlock.MaxHeight = 30;
 
                     break;
 

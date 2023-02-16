@@ -133,6 +133,22 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
+        /// Content used to adorn an overflowing text block
+        /// </summary>
+        public string OverflowContent
+        {
+            get => _overflowContent;
+            set
+            {
+                if (_overflowContent != value)
+                {
+                    _overflowContent = value;
+                    InvalidateLayout();
+                }
+            }
+        }
+
+        /// <summary>
         /// The base directionality of this text block (whether text is laid out 
         /// left to right, or right to left)
         /// </summary>
@@ -235,7 +251,7 @@ namespace Topten.RichTextKit
             }
 
             // Append the ellipsis to the line and relayout theline
-            AdornLineWithEllipsis(line, true);
+            AdornLineWithOverflowContent(line, true);
 
             // Work out the new x-alignment
             var ta = ResolveTextAlignment();
@@ -947,6 +963,11 @@ namespace Topten.RichTextKit
         /// Base direction as resolved if auto
         /// </summary>
         TextDirection _resolvedBaseDirection;
+
+        /// <summary>
+        /// Content used to adorn an overflowing text block
+        /// </summary>
+        string _overflowContent;
 
         /// <summary>
         /// Re-usable buffers for text shaping results
@@ -1836,26 +1857,21 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
-        /// Re-usable buffer holding just the ellipsis character
-        /// </summary>
-        static Utf32Buffer ellipsis = new Utf32Buffer("…");
-
-        /// <summary>
         /// Create a special font run containing the ellipsis character
         /// based on an existing run
         /// </summary>
         /// <param name="basedOn">The run to base the styling on</param>
         /// <returns>A new font run containing the ellipsis character</returns>
-        FontRun CreateEllipsisRun(FontRun basedOn)
+        FontRun CreateOverflowRun(FontRun basedOn, Utf32Buffer content)
         {
             // Get the type face
             var typeface = TypefaceFromStyle(basedOn.Style, true);
 
             // Split into font fallback runs (there should only ever be just one)
-            var fontRun = FontFallback.GetFontRuns(ellipsis.AsSlice(), typeface).Single();
+            var fontRun = FontFallback.GetFontRuns(content.AsSlice(), typeface).Single();
 
             // Create the new run and mark is as a special run type for ellipsis
-            var fr = CreateFontRun(basedOn.StyleRun, ellipsis.SubSlice(fontRun.Start, fontRun.Length), _resolvedBaseDirection, basedOn.Style, fontRun.Typeface, typeface);
+            var fr = CreateFontRun(basedOn.StyleRun, content.SubSlice(fontRun.Start, fontRun.Length), _resolvedBaseDirection, basedOn.Style, fontRun.Typeface, typeface);
             fr.RunKind = FontRunKind.Ellipsis;
 
             // Done
@@ -1867,13 +1883,17 @@ namespace Topten.RichTextKit
         /// </summary>
         /// <param name="line">The line to be updated</param>
         /// <param name="postLayout">True if the ellipsis is being added post layout via a user call to AddEllipsis()</param>
-        void AdornLineWithEllipsis(TextLine line, bool postLayout = false)
+        void AdornLineWithOverflowContent(TextLine line, bool postLayout = false)
         {
             var lastRun = line.Runs[line.Runs.Count - 1];
 
-            // Don't add ellipsis if the last run actually
+            // Don't adorn if the last run actually
             // has all the text...
             if (!postLayout && lastRun.End == _codePoints.Length)
+                return;
+
+            // Don't adorn if overflow content is `clip` or empty
+            if (string.IsNullOrEmpty(_overflowContent) || _overflowContent.Equals("clip"))
                 return;
 
             // Remove all trailing whitespace from the line
@@ -1902,7 +1922,8 @@ namespace Topten.RichTextKit
                 lastRun = line.Runs[line.Runs.Count - 1];
 
             // Create a new run for the ellipsis
-            var ellipsisRun = CreateEllipsisRun(lastRun);
+            var content = _overflowContent == "ellipsis" ? "…" : _overflowContent;
+            var ellipsisRun = CreateOverflowRun(lastRun, new Utf32Buffer(content));
 
             // Work out how much room we've got.  If this is user request
             // to append the ellipsis and MaxWidth isn't set then make sure
@@ -2005,7 +2026,7 @@ namespace Topten.RichTextKit
                 }
                 if (_lines.Count > 0)
                 {
-                    AdornLineWithEllipsis(_lines[_lines.Count - 1]);
+                    AdornLineWithOverflowContent(_lines[_lines.Count - 1]);
                 }
                 _truncated = true;
                 return false;
@@ -2016,7 +2037,7 @@ namespace Topten.RichTextKit
             {
                 if (_lines.Count > 0)
                 {
-                    AdornLineWithEllipsis(_lines[_lines.Count - 1]);
+                    AdornLineWithOverflowContent(_lines[_lines.Count - 1]);
                 }
                 _truncated = true;
                 return false;

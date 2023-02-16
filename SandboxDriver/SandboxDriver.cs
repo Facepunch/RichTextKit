@@ -11,7 +11,7 @@ namespace SandboxDriver
             FontMapper.Default = new SandboxFontMapper();
         }
 
-        public int ContentModeCount = 16;
+        public int ContentModeCount = 17;
         public int ContentMode = 0;
         public TextDirection BaseDirection = TextDirection.LTR;
         public TextAlignment TextAlignment = TextAlignment.Auto;
@@ -258,9 +258,17 @@ namespace SandboxDriver
                     break;
 
                 case 15:
-                    _textBlock.OverflowContent = "ellipsis";
-                    _textBlock.AddText("This one is 150px in length", styleNormal);
-                    _textBlock.MaxWidth = 135;
+                    _textBlock.Overflow = TextOverflow.Ellipsis;
+                    _textBlock.AddText("This text block will adorn with an ellipsis when it begins to overflow", styleNormal);
+                    _textBlock.MaxWidth = 350;
+                    _textBlock.MaxHeight = 30;
+
+                    break;
+
+                case 16:
+                    _textBlock.Overflow = TextOverflow.Clip;
+                    _textBlock.AddText("This text block will clip when it begins to overflow", styleNormal);
+                    _textBlock.MaxWidth = 350;
                     _textBlock.MaxHeight = 30;
 
                     break;

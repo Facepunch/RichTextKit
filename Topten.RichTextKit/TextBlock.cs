@@ -133,6 +133,26 @@ namespace Topten.RichTextKit
         }
 
         /// <summary>
+        /// Sets how a text block will overflow.
+        /// <remarks>
+        /// <see cref="TextOverflow.Ellipsis"/> will append an ellipsis.
+        /// <see cref="TextOverflow.Clip"/> will clip without appending anything.
+        /// </remarks>
+        /// </summary>
+        public TextOverflow Overflow
+        {
+            get => _overflow;
+            set
+            {
+                if(_overflow != value)
+                {
+                    _overflow = value;
+                    InvalidateLayout();
+                }
+            }
+        }
+
+        /// <summary>
         /// The base directionality of this text block (whether text is laid out 
         /// left to right, or right to left)
         /// </summary>
@@ -235,7 +255,7 @@ namespace Topten.RichTextKit
             }
 
             // Append the ellipsis to the line and relayout theline
-            AdornLineWithEllipsis(line, true);
+            AdornLineWithOverflowContent(line, true);
 
             // Work out the new x-alignment
             var ta = ResolveTextAlignment();
@@ -947,6 +967,11 @@ namespace Topten.RichTextKit
         /// Base direction as resolved if auto
         /// </summary>
         TextDirection _resolvedBaseDirection;
+
+        /// <summary>
+        /// How text blocks will overflow
+        /// </summary>
+        TextOverflow _overflow;
 
         /// <summary>
         /// Re-usable buffers for text shaping results
@@ -1846,7 +1871,7 @@ namespace Topten.RichTextKit
         /// </summary>
         /// <param name="basedOn">The run to base the styling on</param>
         /// <returns>A new font run containing the ellipsis character</returns>
-        FontRun CreateEllipsisRun(FontRun basedOn)
+        FontRun CreateOverflowRun(FontRun basedOn)
         {
             // Get the type face
             var typeface = TypefaceFromStyle(basedOn.Style, true);
@@ -1867,13 +1892,17 @@ namespace Topten.RichTextKit
         /// </summary>
         /// <param name="line">The line to be updated</param>
         /// <param name="postLayout">True if the ellipsis is being added post layout via a user call to AddEllipsis()</param>
-        void AdornLineWithEllipsis(TextLine line, bool postLayout = false)
+        void AdornLineWithOverflowContent(TextLine line, bool postLayout = false)
         {
             var lastRun = line.Runs[line.Runs.Count - 1];
 
-            // Don't add ellipsis if the last run actually
+            // Don't adorn if the last run actually
             // has all the text...
             if (!postLayout && lastRun.End == _codePoints.Length)
+                return;
+
+            // Don't adorn if overflow is set to clip
+            if (_overflow == TextOverflow.Clip)
                 return;
 
             // Remove all trailing whitespace from the line
@@ -1902,7 +1931,7 @@ namespace Topten.RichTextKit
                 lastRun = line.Runs[line.Runs.Count - 1];
 
             // Create a new run for the ellipsis
-            var ellipsisRun = CreateEllipsisRun(lastRun);
+            var ellipsisRun = CreateOverflowRun(lastRun);
 
             // Work out how much room we've got.  If this is user request
             // to append the ellipsis and MaxWidth isn't set then make sure
@@ -2005,7 +2034,7 @@ namespace Topten.RichTextKit
                 }
                 if (_lines.Count > 0)
                 {
-                    AdornLineWithEllipsis(_lines[_lines.Count - 1]);
+                    AdornLineWithOverflowContent(_lines[_lines.Count - 1]);
                 }
                 _truncated = true;
                 return false;
@@ -2016,7 +2045,7 @@ namespace Topten.RichTextKit
             {
                 if (_lines.Count > 0)
                 {
-                    AdornLineWithEllipsis(_lines[_lines.Count - 1]);
+                    AdornLineWithOverflowContent(_lines[_lines.Count - 1]);
                 }
                 _truncated = true;
                 return false;
